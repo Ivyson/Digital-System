@@ -1,37 +1,48 @@
-from pyeda.inter import exprvars, Or, And, Not, Xor # Use pip install pyeda for this....
+from sympy import symbols
+from sympy.logic.boolalg import truth_table, And, Nor
 
-# Define Boolean variables, e.g., up to 6 inputs
-x = exprvars('x', 6)  # Creates variables x[0], x[1], ..., x[5]
+# Define up to 6 input variables
+x1, x2, x3, x4, x5, x6 = symbols('x1 x2 x3 x4 x5 x6')
+R = Nor(x1, x2)
+S = And(x3, x4)
+P = And(x3, R)
+X = Nor(P, S)
+expression = X
 
-# Define gates using pyeda syntax
-# You can combine gates to form complex expressions
+# Generate truth table
+print("Truth table for the expression:", expression)
+print("x1 | x2 | x3 | x4 | R | S | P | X | Output")
+print("-" * 40)
 
-# AND Gate: x1 AND x2
-and_gate = x[0] & x[1]
+# Target conditions to check
+target1 = [1, 1, 1, 0]
+target2 = [0, 1, 1, 1]
+target3 = [1, 1, 0, 0]
+target4 = [1, 0, 0, 0]
+target5 = [0, 0, 1, 1]
 
-# OR Gate: x1 OR x2
-or_gate = x[0] | x[1]
+# Loop through the truth table and print each row in a formatted way
+for row in truth_table(expression, [x1, x2, x3, x4]):
+    inputs = [int(val) for val in row[0]]  # Convert True/False to 1/0 (list of ints)
+    output = 1 if row[1] else 0  # Convert output from True/False to 1/0
 
-# NOT Gate: NOT x1
-not_gate = ~x[0]
+    # Calculate intermediate values
+    r_val = 1 if Nor(inputs[0], inputs[1]) else 0
+    s_val = 1 if And(inputs[2], inputs[3]) else 0
+    p_val = 1 if And(inputs[2], r_val) else 0
+    x_val = 1 if Nor(p_val, s_val) else 0
 
-# NAND Gate: x1 NAND x2
-nand_gate = ~(x[0] & x[1])
+    # Print the row with intermediate values
+    print(f"{inputs[0]}  | {inputs[1]}  | {inputs[2]}  | {inputs[3]}  | {r_val} | {s_val} | {p_val} | {x_val} | {output}")
 
-# NOR Gate: x1 NOR x2
-nor_gate = ~(x[0] | x[1])
-
-# XOR Gate: x1 XOR x2
-xor_gate = x[0] ^ x[1]
-
-# XNOR Gate (XNOR is also called EQUIV): x1 XNOR x2
-xnor_gate = ~(x[0] ^ x[1])  # Alternatively, x[0].eq(x[1])
-
-# Example of a complex expression combining these gates
-# e.g., ((x1 NOR x2) AND (NOT x3)) OR (x4 NAND x5)
-complex_expr = (nor_gate & not_gate) | nand_gate
-
-# Print the expression and its truth table
-print("Complex expression:", complex_expr)
-print("Truth table for the expression:")
-print(complex_expr.truthtable())
+    # Check if the current inputs match any of the target conditions
+    # if inputs == target1:
+    #     print(f"{inputs} |   {output} 1")
+    # if inputs == target2:
+    #     print(f"{inputs} |   {output} 2")
+    # if inputs == target3:
+    #     print(f"{inputs} |   {output} 3")
+    # if inputs == target4:
+    #     print(f"{inputs} |   {output} 4")
+    # if inputs == target5:
+    #     print(f"{inputs} |   {output} 5")
